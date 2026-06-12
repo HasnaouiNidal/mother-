@@ -1,0 +1,6 @@
+{
+  "name": "Health Power Supplements",
+  "description": "High-converting Moroccan supplement brand website focused on WhatsApp sales.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

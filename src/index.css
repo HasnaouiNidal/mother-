@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-green: #2C5E3B; /* Deep Sage Green */
+  --color-brand-green-light: #448057; /* Light emerald accent */
+  --color-brand-dark: #0A2518; /* Rich Deep Forest Green */
+  --color-brand-beige: #FAF8F5; /* Warm Champagne Background */
+  --color-brand-beige-light: #FFFDFB; /* Pristine Soft Cream */
+  --color-brand-gold: #C8A261; /* Satin Gold */
+  --color-brand-gold-light: #DFBE84; /* Soft Gold Shimmer */
+  --color-brand-border: #E8E2D7; /* Very Soft Border */
+  
+  --font-sans: "Outfit", "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-brand-beige);
+    color: var(--color-brand-dark);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom Utilities for Premium Look */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-panel-dark {
+  background: rgba(10, 37, 24, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #C8A261 0%, #E8D3A7 50%, #C8A261 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #C8A261 0%, #DFBE84 100%);
+}
+
+.green-gradient-bg {
+  background: linear-gradient(135deg, #0A2518 0%, #174229 100%);
+}
+
+.animated-glow {
+  position: absolute;
+  filter: blur(120px);
+  opacity: 0.15;
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Custom animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.92; transform: scale(1.02); }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-btn {
+  background: linear-gradient(90deg, #25D366 0%, #34E073 25%, #25D366 50%, #34E073 75%, #25D366 100%);
+  background-size: 200% auto;
+  animation: shimmer 6s linear infinite;
+}
+
+.shimmer-btn:hover {
+  animation: shimmer 2s linear infinite;
+}
+
