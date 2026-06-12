@@ -43,7 +43,7 @@ export default function FloatingWhatsApp() {
           initial={{ opacity: 0, y: 50, scale: 0.8 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.8 }}
-          className="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 z-50 flex flex-col items-end gap-3.5"
+          className="fixed bottom-24 right-6 md:bottom-8 lg:bottom-10 md:right-8 lg:right-10 z-50 flex flex-col items-end gap-3.5"
         >
           {/* Notification bubble */}
           <AnimatePresence>
