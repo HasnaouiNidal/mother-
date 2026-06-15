@@ -14,8 +14,23 @@ interface Particle {
 
 export default function LeafParticles() {
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mediaQuery.matches);
+    
+    const handler = (e: MediaQueryListEvent) => {
+      setReducedMotion(e.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    
     // Generate a set of random organic drifting particles
     const generated: Particle[] = Array.from({ length: 15 }).map((_, i) => ({
       id: i,
@@ -28,7 +43,9 @@ export default function LeafParticles() {
       rotateEnd: Math.random() * 360 + 180
     }));
     setParticles(generated);
-  }, []);
+  }, [reducedMotion]);
+
+  if (reducedMotion) return null;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">

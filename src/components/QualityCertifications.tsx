@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
-import { ShieldCheck, CalendarRange, HeartPulse, Award } from 'lucide-react';
+import { ShieldCheck, Award, HeartPulse, CalendarRange, ChevronDown } from 'lucide-react';
+import SectionHeader from './ui/SectionHeader';
 
 interface Certification {
   id: number;
-  icon: any;
+  icon: React.ComponentType<any>;
   title: string;
   frontDesc: string;
   backDesc: string;
@@ -16,141 +16,162 @@ export default function QualityCertifications() {
     {
       id: 1,
       icon: ShieldCheck,
-      title: "Enregistré & Conforme",
-      frontDesc: "Normes de sécurité alimentaire marocaines strictes.",
-      backDesc: "Tous nos compléments respectent scrupuleusement les régulations de contrôle sanitaire en vigueur au Maroc. Nous garantissons une traçabilité totale.",
-      seal: "ONSSA Norms"
+      title: "Conformité Suivie",
+      frontDesc: "Suivi rigoureux des processus réglementaires sanitaires.",
+      backDesc: "Tous nos produits font l'objet d'un suivi sanitaire attentif. Nous assurons la traçabilité de chaque boîte depuis la fabrication jusqu'au transport.",
+      seal: "Traçabilité"
     },
     {
       id: 2,
       icon: Award,
-      title: "Bio-disponibilité Forte",
-      frontDesc: "Formulations hautement assimilables par les cellules.",
-      backDesc: "Nous sélectionnons la forme Bisglycinate pour le Magnésium. Elle est absorbée à 95% sans causer de maux d'estomac ou d'effets laxatifs gênants.",
-      seal: "Bio-active"
+      title: "Formulation Assimilée",
+      frontDesc: "Choix de composants offrant un bon confort digestif.",
+      backDesc: "Nous privilégions le magnésium sous sa forme Bisglycinate, reconnue pour être bien assimilée par l'organisme sans provoquer d'inconfort intestinal.",
+      seal: "Assimilation"
     },
     {
       id: 3,
       icon: HeartPulse,
-      title: "Gélules 100% Végétales",
-      frontDesc: "Capsules HPMC naturelles (zéro gélatine animale).",
-      backDesc: "Contrairement aux gélules pas chères à base de porc ou de boeuf, nous utilisons uniquement des enveloppes végétales en cellulose naturelle de pin (Halal/Vegan).",
-      seal: "HPMC Vegan"
+      title: "Gélules Végétales",
+      frontDesc: "Capsules élaborées à partir de cellulose de pin.",
+      backDesc: "Les enveloppes de nos gélules sont fabriquées uniquement avec de la cellulose de pin d'origine végétale, excluant tout composant d'origine animale.",
+      seal: "HPMC"
     },
     {
       id: 4,
       icon: CalendarRange,
-      title: "Fraîcheur Garantie",
-      frontDesc: "Paiement en espèces à la livraison sous 24h/48h.",
-      backDesc: "Nos stocks sont renouvelés chaque mois pour vous assurer des compléments frais avec une date d'expiration lointaine. Livraison gratuite à domicile.",
-      seal: "Strict Fresh"
+      title: "Stock Contrôlé",
+      frontDesc: "Renouvellement régulier pour une conservation soignée.",
+      backDesc: "Nos approvisionnements sont planifiés à intervalles réguliers afin de stocker les compléments dans des conditions idéales de conservation.",
+      seal: "Stock contrôlé"
     }
   ];
 
-  // Track flipped state per card index
-  const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
+  // Track expanded state (only one card can be expanded at a time)
+  const [expandedCardId, setExpandedCardId] = useState<number | null>(1); // Default first card open
+  const [lastActiveCert, setLastActiveCert] = useState<Certification | null>(certifications[0]);
 
-  const toggleFlip = (id: number) => {
-    setFlippedCards(prev => ({ ...prev, [id]: !prev[id] }));
+  const toggleCard = (id: number) => {
+    setExpandedCardId(prev => {
+      const next = prev === id ? null : id;
+      if (next !== null) {
+        const found = certifications.find(c => c.id === next);
+        if (found) setLastActiveCert(found);
+      }
+      return next;
+    });
   };
 
   return (
-    <section className="py-24 bg-white border-b border-brand-border/30 relative z-20 overflow-hidden">
+    <section className="py-20 sm:py-24 md:py-28 bg-white border-b border-brand-border/30 relative z-20 overflow-hidden" aria-label="Engagements de qualité et transparence">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-[10px] uppercase tracking-widest text-brand-green font-bold bg-brand-green/5 border border-brand-green/10 px-4 py-1.5 rounded-full">
-            Authenticité
-          </span>
-          <h2 className="text-3xl md:text-5xl font-serif font-black text-brand-dark mt-4 mb-4 leading-tight">
-            Transparence & Qualité
-          </h2>
-          <p className="text-base text-brand-dark/70 font-sans font-light">
-            Parce que votre santé mérite le meilleur. Cliquez sur les cartes ci-dessous pour découvrir nos gages de confiance.
-          </p>
-        </div>
+        {/* Header primitive */}
+        <SectionHeader
+          tagline="Suivi & Engagements"
+          title="Transparence & Qualité"
+          description="Des choix d'ingrédients rigoureux et un suivi attentif pour accompagner votre hygiène de vie au quotidien. Cliquez pour voir les détails."
+          className="mb-14 sm:mb-16"
+        />
 
-        {/* 3D Flipping Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 perspective-1000">
+        {/* Responsive Grid: 1 column on mobile, 2 columns on tablet, 4 columns on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {certifications.map((cert) => {
             const Icon = cert.icon;
-            const isFlipped = !!flippedCards[cert.id];
+            const isOpen = expandedCardId === cert.id;
+            const panelId = `quality-panel-${cert.id}`;
 
             return (
               <div 
                 key={cert.id}
-                onClick={() => toggleFlip(cert.id)}
-                className="h-64 cursor-pointer relative group rounded-2xl w-full"
-                style={{ perspective: "1000px" }}
+                onClick={() => toggleCard(cert.id)}
+                className={`flex flex-col justify-between p-6 bg-white border rounded-2xl shadow-xs transition-all duration-200 cursor-pointer text-left h-full select-none ${
+                  isOpen 
+                    ? 'border-brand-green bg-brand-green/5 shadow-sm' 
+                    : 'border-brand-border/50 hover:border-brand-green/30 hover:shadow-xs'
+                }`}
               >
-                {/* Rotatable Inner Container */}
-                <motion.div 
-                  animate={{ rotateY: isFlipped ? 180 : 0 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }}
-                  style={{ transformStyle: "preserve-3d" }}
-                  className="w-full h-full relative duration-500 rounded-2xl"
-                >
-                  
-                  {/* Front Side */}
-                  <div 
-                    style={{ backfaceVisibility: "hidden" }}
-                    className="absolute inset-0 w-full h-full bg-brand-beige-light/70 border border-brand-border/40 hover:border-brand-green p-6 rounded-2xl flex flex-col justify-between transition-colors shadow-sm"
-                  >
-                    <div>
-                      <div className="w-12 h-12 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-6">
-                        <Icon size={22} />
-                      </div>
-                      <h4 className="font-serif font-bold text-base text-brand-dark mb-2">
-                        {cert.title}
-                      </h4>
-                      <p className="text-xs text-brand-dark/60 leading-relaxed font-sans font-light">
-                        {cert.frontDesc}
-                      </p>
+                <div className="w-full">
+                  {/* Top Row: Icon and Proof Badge with wrap to prevent overflow */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+                    <div className="w-11 h-11 rounded-xl bg-brand-green/5 text-brand-green border border-brand-green/10 flex items-center justify-center shrink-0" aria-hidden="true">
+                      <Icon size={20} className="stroke-[2.25]" />
                     </div>
-                    
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-brand-gold bg-brand-dark px-2.5 py-1 rounded-full">
-                        {cert.seal}
-                      </span>
-                      <span className="text-[10px] font-bold text-brand-green uppercase tracking-wider group-hover:translate-x-1 transition-all">
-                        Détails →
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Back Side */}
-                  <div 
-                    style={{ 
-                      backfaceVisibility: "hidden", 
-                      transform: "rotateY(180deg)" 
-                    }}
-                    className="absolute inset-0 w-full h-full bg-brand-dark text-white p-6 rounded-2xl flex flex-col justify-between shadow-lg border border-brand-green-light"
-                  >
-                    <div>
-                      <span className="text-[8px] font-black uppercase tracking-widest text-brand-gold-light border border-brand-gold/20 px-2 py-0.5 rounded-full inline-block mb-3">
-                        Gage de Confiance
-                      </span>
-                      <h5 className="font-serif font-bold text-sm text-brand-gold mb-2">
-                        {cert.title}
-                      </h5>
-                      <p className="text-xs text-white/80 leading-relaxed font-sans font-light">
-                        {cert.backDesc}
-                      </p>
-                    </div>
-
-                    <span className="text-[10px] text-brand-gold-light font-bold uppercase text-right block tracking-wider">
-                      ← Retour
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-brand-gold bg-brand-gold/10 border border-brand-gold/20 px-2.5 py-1 rounded-md shrink-0 max-w-full truncate">
+                      {cert.seal}
                     </span>
                   </div>
 
-                </motion.div>
+                  {/* Title */}
+                  <h3 className="text-lg font-sans font-extrabold text-brand-dark tracking-tight leading-tight mt-6">
+                    {cert.title}
+                  </h3>
+
+                  {/* Short description */}
+                  <p className="mt-2 text-sm text-brand-muted font-sans font-light leading-relaxed">
+                    {cert.frontDesc}
+                  </p>
+
+                  {/* Inline Details Expansion Panel (Mobile only: < 640px) */}
+                  <div 
+                    id={panelId}
+                    className={`block sm:hidden grid transition-[grid-template-rows,opacity] duration-200 ease-in-out overflow-hidden motion-reduce:transition-none ${
+                      isOpen ? 'grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-brand-border/30' : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="text-sm text-brand-dark/95 font-sans font-medium leading-relaxed bg-brand-beige/40 p-3.5 rounded-xl border border-brand-border/30">
+                        <strong>Détails de qualité :</strong> {cert.backDesc}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Link & Arrow Action */}
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleCard(cert.id);
+                  }}
+                  className="w-full mt-6 pt-3 border-t border-brand-border/10 flex items-center justify-between text-xs font-black text-brand-green uppercase tracking-widest leading-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-2 rounded-sm select-none"
+                >
+                  <span>{isOpen ? "Masquer détails" : "En savoir plus"}</span>
+                  <ChevronDown size={14} className={`transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+                </button>
+
               </div>
             );
           })}
+        </div>
+
+        {/* Shared Desktop Details Panel (Tablet/Desktop only: >= 640px) */}
+        <div 
+          id="quality-details-panel-desktop"
+          role="region"
+          aria-label="Détails de qualité"
+          className={`hidden sm:grid transition-[grid-template-rows,opacity] duration-200 ease-in-out mt-8 motion-reduce:transition-none ${
+            expandedCardId !== null ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+          }`}
+        >
+          <div className="overflow-hidden">
+            {lastActiveCert && (
+              <div className="bg-brand-beige border border-brand-border/50 p-6 rounded-2xl shadow-xs text-left">
+                <h4 className="font-sans font-extrabold text-brand-green text-sm sm:text-base mb-2">
+                  Détails de qualité : {lastActiveCert.title}
+                </h4>
+                <p className="text-sm text-brand-dark/90 leading-relaxed font-sans font-light">
+                  {lastActiveCert.backDesc}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
       </div>
     </section>
   );
 }
+

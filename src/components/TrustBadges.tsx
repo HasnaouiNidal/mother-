@@ -1,62 +1,62 @@
 import { Truck, ShieldCheck, Leaf, HeartHandshake } from 'lucide-react';
-import { motion } from 'motion/react';
 
 const features = [
   {
     icon: Leaf,
-    title: "100% Organique",
-    description: "Formules pures, bio, testées scientifiquement sans additifs chimiques nocifs."
+    title: "Formule Naturelle",
+    description: "Ingrédients d'origine naturelle sans additifs."
   },
   {
     icon: HeartHandshake,
     title: "Paiement à la Livraison",
-    description: "Zéro risque. Vous payez en espèces uniquement quand le colis arrive chez vous."
+    description: "Payez en espèces à la réception."
   },
   {
     icon: Truck,
     title: "Livraison Express",
-    description: "Expédition ultra-rapide partout au Maroc. Suivi SMS inclus pour chaque envoi."
+    description: "Livré sous 24h à 48h partout au Maroc."
   },
   {
     icon: ShieldCheck,
-    title: "Qualité Certifiée",
-    description: "Ingrédients premium rigoureusement contrôlés pour garantir efficacité et sécurité."
+    title: "Qualité Contrôlée",
+    description: "Produits rigoureusement testés et validés."
   }
 ];
 
 export default function TrustBadges() {
   return (
-    <section className="py-12 bg-white relative z-20 border-y border-brand-border/40 shadow-sm">
+    <section className="py-16 sm:py-20 bg-brand-beige border-y border-brand-border/40 relative z-20 shadow-xs" aria-label="Garanties principales">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: idx * 0.1, ease: "easeOut" }}
-              whileHover={{ 
-                y: -6, 
-                boxShadow: "0 12px 30px -10px rgba(10, 37, 24, 0.08)",
-                borderColor: "var(--color-brand-gold)" 
-              }}
-              className="flex items-start gap-4 p-6 bg-brand-beige-light/50 border border-brand-border/30 rounded-2xl transition-all duration-300 group"
-            >
-              <div className="w-12 h-12 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center flex-shrink-0 group-hover:bg-brand-gold group-hover:text-white transition-colors duration-300">
-                <feature.icon size={22} className="transition-transform duration-500 group-hover:scale-110" />
-              </div>
-              <div>
-                <h4 className="font-serif font-bold text-brand-dark text-sm md:text-base mb-1 group-hover:text-brand-green transition-colors">
+        
+        {/* Responsive Grid: 2 columns on mobile (360px+), 4 columns on desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {features.map((feature, idx) => {
+            const Icon = feature.icon;
+            
+            return (
+              <div 
+                key={idx}
+                className="flex flex-col items-center text-center p-4 sm:p-6 bg-brand-beige-light border border-brand-border/30 rounded-2xl shadow-xs h-full transition-all duration-200 motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-sm group cursor-default"
+              >
+                {/* Icon Container: identical styling and size */}
+                <div className="w-11 h-11 rounded-full bg-brand-green/5 text-brand-green border border-brand-green/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-brand-green group-hover:text-white transition-colors duration-200" aria-hidden="true">
+                  <Icon size={20} className="stroke-[2.25]" />
+                </div>
+                
+                {/* Title: high contrast font size >= 14px on mobile */}
+                <h3 className="font-sans font-extrabold text-sm sm:text-base text-brand-dark tracking-tight leading-tight">
                   {feature.title}
-                </h4>
-                <p className="text-xs text-brand-dark/60 leading-relaxed font-sans font-light">
+                </h3>
+                
+                {/* Short Description: reduced to exactly one readable line, size 14px on mobile */}
+                <p className="mt-1.5 font-sans font-light text-sm text-brand-muted leading-relaxed">
                   {feature.description}
                 </p>
               </div>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
+        
       </div>
     </section>
   );

@@ -1,17 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-brand-green: #2C5E3B; /* Deep Sage Green */
-  --color-brand-green-light: #448057; /* Light emerald accent */
-  --color-brand-dark: #0A2518; /* Rich Deep Forest Green */
-  --color-brand-beige: #FAF8F5; /* Warm Champagne Background */
-  --color-brand-beige-light: #FFFDFB; /* Pristine Soft Cream */
-  --color-brand-gold: #C8A261; /* Satin Gold */
-  --color-brand-gold-light: #DFBE84; /* Soft Gold Shimmer */
-  --color-brand-border: #E8E2D7; /* Very Soft Border */
-  
-  --font-sans: "Outfit", "Inter", "Segoe UI", Roboto, sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
+  /* Brand Color Tokens */
+  --color-brand-green: #1E3F27;
+  --color-brand-green-hover: #162E1C;
+  --color-brand-green-light: #2D5C39;
+  --color-brand-dark: #0D1E13;
+  --color-brand-beige: #FAF8F5;
+  --color-brand-beige-light: #FFFDFB;
+  --color-brand-gold: #D4AF37;
+  --color-brand-gold-hover: #C59F2A;
+  --color-brand-gold-light: #F3E5AB;
+  --color-brand-muted: #5C6B61;
+  --color-brand-border: #E8E2D7;
+  --color-whatsapp-green: #25D366;
+  --color-whatsapp-hover: #1EBE57;
+  --color-error-red: #D32F2F;
+
+  /* Typography */
+  --font-sans: "Outfit", "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+
+  /* Spacing Scale (8px increments mapping to standard Tailwind utility syntax) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-24: 96px;
+
+  /* Radius Scale */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadow Scale */
+  --shadow-sm: 0 1px 2px 0 rgba(13, 30, 19, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(13, 30, 19, 0.08), 0 2px 4px -1px rgba(13, 30, 19, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(13, 30, 19, 0.1), 0 4px 6px -2px rgba(13, 30, 19, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(13, 30, 19, 0.15), 0 10px 10px -5px rgba(13, 30, 19, 0.04);
+  --shadow-gold: 0 10px 20px -3px rgba(212, 175, 55, 0.25);
+
+  /* Transition Durations */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease-in-out;
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-Index Ladder */
+  --z-base: 0;
+  --z-card: 10;
+  --z-sticky: 100;
+  --z-drawer: 200;
+  --z-floating: 300;
+  --z-modal: 500;
 }
 
 @layer base {
@@ -20,10 +68,11 @@
     color: var(--color-brand-dark);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Custom Utilities for Premium Look */
+/* ── Glass Panels ───────────────────────────────────────────────────────── */
 .glass-panel {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(16px);
@@ -38,10 +87,19 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.glass-hero {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Gradient Texts ─────────────────────────────────────────────────────── */
 .gold-gradient-text {
   background: linear-gradient(135deg, #C8A261 0%, #E8D3A7 50%, #C8A261 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .gold-gradient-bg {
@@ -52,6 +110,7 @@
   background: linear-gradient(135deg, #0A2518 0%, #174229 100%);
 }
 
+/* ── Glow Effects ───────────────────────────────────────────────────────── */
 .animated-glow {
   position: absolute;
   filter: blur(120px);
@@ -61,28 +120,80 @@
   pointer-events: none;
 }
 
-/* Custom animations */
+.product-glow-green {
+  box-shadow:
+    0 0 60px rgba(44, 94, 59, 0.4),
+    0 0 120px rgba(44, 94, 59, 0.2),
+    0 0 200px rgba(44, 94, 59, 0.1);
+}
+
+.product-glow-gold {
+  box-shadow:
+    0 0 60px rgba(200, 162, 97, 0.4),
+    0 0 120px rgba(200, 162, 97, 0.2),
+    0 0 200px rgba(200, 162, 97, 0.1);
+}
+
+/* ── Core Animations ────────────────────────────────────────────────────── */
+
+/* Particle Float — used by ParticleField */
+@keyframes particleFloat {
+  0%   { transform: translateY(0px) translateX(0px) scale(1); opacity: var(--p-opacity, 0.4); }
+  25%  { transform: translateY(-18px) translateX(6px) scale(1.05); }
+  50%  { transform: translateY(-8px) translateX(-4px) scale(0.95); opacity: calc(var(--p-opacity, 0.4) * 1.4); }
+  75%  { transform: translateY(-22px) translateX(8px) scale(1.08); }
+  100% { transform: translateY(0px) translateX(0px) scale(1); opacity: var(--p-opacity, 0.4); }
+}
+
+/* Shimmer slide — for CTA button hover */
+@keyframes shimmerSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* Generic float */
 @keyframes float {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(2deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(1.5deg); /* Moves up and slightly tilts */
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.anti-gravity-product {
+  animation: float 6s ease-in-out infinite;
+  filter: drop-shadow(0px 20px 30px rgba(0, 0, 0, 0.4)); /* Adds realistic floating shadow */
+}
+
+.glass-callout {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
 
+/* Soft pulse */
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.92; transform: scale(1.02); }
+  50%       { opacity: 0.92; transform: scale(1.02); }
 }
 
 .animate-pulse-soft {
   animation: pulse-soft 3s ease-in-out infinite;
 }
 
+/* Shimmer button */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
+  0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
@@ -96,3 +207,32 @@
   animation: shimmer 2s linear infinite;
 }
 
+/* Orbit ring */
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Glow pulse */
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; filter: blur(40px); }
+  50%       { opacity: 0.75; filter: blur(50px); }
+}
+
+/* Entrance slide up */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Scale in */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}

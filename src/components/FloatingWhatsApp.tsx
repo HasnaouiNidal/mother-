@@ -1,11 +1,13 @@
-import { MessageCircle, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { openWhatsApp } from '../lib/utils';
+import FloatingWhatsAppButton from './ui/FloatingWhatsAppButton';
 
 export default function FloatingWhatsApp() {
   const [isVisible, setIsVisible] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [isNearFooter, setIsNearFooter] = useState(false);
 
   useEffect(() => {
     // Show when scrolled or after 5 seconds delay
@@ -36,15 +38,30 @@ export default function FloatingWhatsApp() {
     }
   }, [isVisible]);
 
+  // Hide floating button when near the footer to avoid covering content
+  useEffect(() => {
+    const footer = document.getElementById('footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsNearFooter(entry.isIntersecting);
+      },
+      { rootMargin: "100px 0px 0px 0px" } // trigger slightly before footer is in view
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, [isVisible]);
+
+  const handleButtonClick = () => {
+    openWhatsApp("Bonjour, j'ai besoin de conseils pour ma commande Health Power.");
+  };
+
   return (
     <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.8 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 50, scale: 0.8 }}
-          className="fixed bottom-24 right-6 md:bottom-8 lg:bottom-10 md:right-8 lg:right-10 z-50 flex flex-col items-end gap-3.5"
-        >
+      {isVisible && !isNearFooter && (
+        <div className="fixed right-6 md:right-8 lg:right-10 z-floating flex flex-col items-end gap-3.5 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-8 lg:bottom-10 select-none">
           {/* Notification bubble */}
           <AnimatePresence>
             {showNotification && (
@@ -58,7 +75,8 @@ export default function FloatingWhatsApp() {
                 {/* Close button */}
                 <button 
                   onClick={() => setShowNotification(false)}
-                  className="absolute top-1.5 right-1.5 text-brand-dark/30 hover:text-brand-dark transition-colors cursor-pointer"
+                  className="absolute top-1.5 right-1.5 text-brand-dark/30 hover:text-brand-dark transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green rounded-md outline-none"
+                  aria-label="Fermer la suggestion"
                 >
                   <X size={12} />
                 </button>
@@ -67,7 +85,7 @@ export default function FloatingWhatsApp() {
                   <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
                   <span className="font-bold text-[10px] text-brand-green uppercase tracking-wider">Conseiller en Ligne</span>
                 </div>
-                <p className="font-light text-brand-dark/90 pr-2">
+                <p className="font-light text-brand-dark/95 pr-2">
                   Salam ! Besoin d'aide pour choisir le bon pack ? Je suis disponible pour répondre à vos questions.
                 </p>
                 {/* Triangle pointer */}
@@ -77,33 +95,14 @@ export default function FloatingWhatsApp() {
           </AnimatePresence>
           
           {/* Main Floating Button */}
-          <div className="relative">
-            {/* Pulsing Outer Glow */}
-            <span className="absolute inset-0 rounded-full bg-[#25D366] opacity-35 animate-ping -z-10 pointer-events-none"></span>
-
-            {/* Notification Badged Dot */}
-            {showNotification && (
-              <motion.span 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1.5 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-md border-2 border-white animate-bounce"
-              >
-                1
-              </motion.span>
-            )}
-
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => openWhatsApp("Bonjour, j'ai besoin de conseils pour ma commande Health Power.")}
-              className="w-16 h-16 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full shadow-2xl flex items-center justify-center transition-all cursor-pointer relative"
-              aria-label="Contacter sur WhatsApp"
-            >
-              <MessageCircle size={30} className="animate-pulse-soft" />
-            </motion.button>
-          </div>
-        </motion.div>
+          <FloatingWhatsAppButton
+            onClick={handleButtonClick}
+            badgeCount={showNotification ? 1 : 0}
+            ariaLabel="Discuter avec un conseiller sur WhatsApp"
+          />
+        </div>
       )}
     </AnimatePresence>
   );
 }
+
