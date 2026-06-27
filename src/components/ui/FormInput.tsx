@@ -9,6 +9,7 @@ interface FormInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   required?: boolean;
+  disabled?: boolean;
   error?: string;
   options?: string[]; // Used for select type
   rows?: number; // Used for textarea type
@@ -25,6 +26,7 @@ export default function FormInput({
   value,
   onChange,
   required = false,
+  disabled = false,
   error,
   options = [],
   rows = 3,
@@ -57,9 +59,10 @@ export default function FormInput({
           value={value}
           onChange={onChange}
           required={required}
+          disabled={disabled}
           aria-invalid={!!error}
           aria-describedby={descId}
-          className={`${inputBaseStyles} ${borderStyles} font-semibold cursor-pointer`}
+          className={`${inputBaseStyles} ${borderStyles} font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {options.map((opt) => (
             <option key={opt} value={opt}>
@@ -75,10 +78,11 @@ export default function FormInput({
           value={value}
           onChange={onChange}
           required={required}
+          disabled={disabled}
           rows={rows}
           aria-invalid={!!error}
           aria-describedby={descId}
-          className={`${inputBaseStyles} ${borderStyles} resize-none`}
+          className={`${inputBaseStyles} ${borderStyles} resize-none disabled:opacity-50`}
         />
       ) : (
         <input
@@ -89,9 +93,10 @@ export default function FormInput({
           value={value}
           onChange={onChange}
           required={required}
+          disabled={disabled}
           aria-invalid={!!error}
           aria-describedby={descId}
-          className={`${inputBaseStyles} ${borderStyles}`}
+          className={`${inputBaseStyles} ${borderStyles} disabled:opacity-50`}
         />
       )}
 

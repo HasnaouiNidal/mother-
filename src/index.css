@@ -3,17 +3,17 @@
 
 @theme {
   /* Brand Color Tokens */
-  --color-brand-green: #1E3F27;
-  --color-brand-green-hover: #162E1C;
-  --color-brand-green-light: #2D5C39;
-  --color-brand-dark: #0D1E13;
-  --color-brand-beige: #FAF8F5;
-  --color-brand-beige-light: #FFFDFB;
-  --color-brand-gold: #D4AF37;
-  --color-brand-gold-hover: #C59F2A;
-  --color-brand-gold-light: #F3E5AB;
+  --color-brand-green: #1F5C43;
+  --color-brand-green-hover: #174532;
+  --color-brand-green-light: #AFC8B2;
+  --color-brand-dark: #1F2421;
+  --color-brand-beige: #FAF7EF;
+  --color-brand-beige-light: #FDFBFAF;
+  --color-brand-gold: #C9A44C;
+  --color-brand-gold-hover: #B59340;
+  --color-brand-gold-light: #E8DDC8;
   --color-brand-muted: #5C6B61;
-  --color-brand-border: #E8E2D7;
+  --color-brand-border: #E8DDC8;
   --color-whatsapp-green: #25D366;
   --color-whatsapp-hover: #1EBE57;
   --color-error-red: #D32F2F;

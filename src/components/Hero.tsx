@@ -256,7 +256,6 @@ export default function Hero({
                     className="object-contain w-full h-full select-none"
                     style={{
                       filter: `brightness(1.04) contrast(1.02) drop-shadow(0px 20px 40px rgba(0,0,0,0.35))`,
-                      imageRendering: 'high-quality',
                     }}
                   />
                 </div>

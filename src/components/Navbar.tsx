@@ -24,7 +24,7 @@ export default function Navbar() {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-sticky transition-[padding,background-color,border-color,box-shadow] duration-200 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-[padding,background-color,border-color,box-shadow] duration-200 ${
         scrolled 
           ? "py-3 bg-white/95 backdrop-blur-md shadow-md border-b border-brand-border/40" 
           : "py-5 bg-transparent border-b border-transparent"
@@ -59,17 +59,22 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
-            {['produits', 'bienfaits', 'temoignages', 'faq'].map((link) => (
+            {[
+              { href: '#vos-besoins', label: 'Mes Besoins' },
+              { href: '#produits', label: 'Produits' },
+              { href: '#temoignages', label: 'Avis Clients' },
+              { href: '#faq', label: 'FAQ' },
+            ].map((link) => (
               <a 
-                key={link}
-                href={`#${link}`} 
+                key={link.href}
+                href={link.href} 
                 className={`text-xs font-bold uppercase tracking-widest transition-colors relative py-2 group focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-1 rounded-sm outline-none ${
                   scrolled 
                     ? "text-brand-dark/90 hover:text-brand-green" 
                     : "text-white/90 hover:text-white"
                 }`}
               >
-                {link === 'temoignages' ? 'Avis Clients' : link}
+                {link.label}
                 <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-200 group-hover:w-full ${
                   scrolled ? "bg-brand-green" : "bg-brand-gold-light"
                 }`}></span>
@@ -114,34 +119,22 @@ export default function Navbar() {
             className="absolute top-full left-0 right-0 bg-white border-b border-brand-border/40 shadow-xl overflow-hidden py-4 z-drawer"
           >
             <div className="px-4 space-y-2 flex flex-col">
-              <a 
-                href="#produits" 
-                onClick={closeMenu} 
-                className="block px-4 py-3 text-sm uppercase tracking-wider font-bold text-brand-dark hover:bg-brand-beige-light hover:text-brand-green rounded-xl transition-all min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
-              >
-                Produits
-              </a>
-              <a 
-                href="#bienfaits" 
-                onClick={closeMenu} 
-                className="block px-4 py-3 text-sm uppercase tracking-wider font-bold text-brand-dark hover:bg-brand-beige-light hover:text-brand-green rounded-xl transition-all min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
-              >
-                Bienfaits
-              </a>
-              <a 
-                href="#temoignages" 
-                onClick={closeMenu} 
-                className="block px-4 py-3 text-sm uppercase tracking-wider font-bold text-brand-dark hover:bg-brand-beige-light hover:text-brand-green rounded-xl transition-all min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
-              >
-                Avis Clients
-              </a>
-              <a 
-                href="#faq" 
-                onClick={closeMenu} 
-                className="block px-4 py-3 text-sm uppercase tracking-wider font-bold text-brand-dark hover:bg-brand-beige-light hover:text-brand-green rounded-xl transition-all min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
-              >
-                Questions Fréquentes
-              </a>
+              {[
+                { href: '#vos-besoins', label: 'Mes Besoins' },
+                { href: '#produits', label: 'Produits' },
+                { href: '#comment-commander', label: 'Comment Commander' },
+                { href: '#temoignages', label: 'Avis Clients' },
+                { href: '#faq', label: 'FAQ' },
+              ].map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className="block px-4 py-3 text-sm uppercase tracking-wider font-bold text-brand-dark hover:bg-brand-beige-light hover:text-brand-green rounded-xl transition-all min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
+                >
+                  {link.label}
+                </a>
+              ))}
               
               <PrimaryCTA
                 onClick={() => {

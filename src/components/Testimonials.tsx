@@ -1,243 +1,227 @@
 import { Star, MessageCircle, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { openWhatsApp } from '../lib/utils';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import SectionHeader from './ui/SectionHeader';
-import PrimaryCTA from './ui/PrimaryCTA';
 
 const reviews = [
   {
-    name: "Khadija M.",
-    city: "Casablanca",
-    product: "Glycimax Magnésium",
-    text: "Je souffrais d'insomnies à cause du stress. Depuis que je prends Glycimax, je dors d'un sommeil plus profond et je me réveille bien reposée. La livraison sur Casablanca s'est faite en 24h !",
+    name: 'Khadija M.',
+    city: 'Casablanca',
+    product: 'Glycimax Magnésium',
+    problemBefore: 'J\'avais des nuits difficiles à cause du stress.',
+    advisorExperience: 'J\'ai parlé avec la conseillère avant de commander. Elle m\'a expliqué le produit, comment le prendre et combien de temps il faut.',
+    deliveryExperience: 'La livraison s\'est faite en 24h. J\'ai payé à la réception, très simple.',
     rating: 5,
-    avatar: "KM",
-    color: "bg-brand-green text-brand-gold"
+    initials: 'KM',
   },
   {
-    name: "Youssef T.",
-    city: "Rabat",
-    product: "Appeto+ Sirop",
-    text: "Mon fils de 6 ans avait du mal à finir ses assiettes. Avec Appeto+, son appétit s'est amélioré progressivement après une semaine. Il mange plus facilement. Très pratique de payer à la livraison.",
+    name: 'Youssef T.',
+    city: 'Rabat',
+    product: 'Appeto+ Sirop',
+    problemBefore: 'Mon fils n\'avait pas d\'appétit depuis plusieurs semaines.',
+    advisorExperience: 'La conseillère m\'a rassuré sur la composition naturelle du sirop et m\'a donné les instructions d\'utilisation clairement.',
+    deliveryExperience: 'Livraison sur Rabat en 24h. Paiement à la réception uniquement, aucun risque.',
     rating: 5,
-    avatar: "YT",
-    color: "bg-brand-green text-brand-gold"
+    initials: 'YT',
   },
   {
-    name: "Amina B.",
-    city: "Marrakech",
-    product: "Glycimax Magnésium",
-    text: "Le service client sur WhatsApp est très réactif. Ils prennent le temps de bien conseiller. Ce magnésium est bien toléré par l'estomac, aucun inconfort digestif constaté.",
+    name: 'Amina B.',
+    city: 'Marrakech',
+    product: 'Glycimax Magnésium',
+    problemBefore: 'Je me réveillais fatiguée chaque matin malgré des heures de sommeil correctes.',
+    advisorExperience: 'La conseillère a été disponible et patiente. Elle m\'a expliqué que le magnésium aide à la qualité du sommeil, pas juste à dormir plus longtemps.',
+    deliveryExperience: 'Emballage soigné, livraison rapide. J\'ai payé cash à la livraison comme promis.',
     rating: 5,
-    avatar: "AB",
-    color: "bg-brand-green text-brand-gold"
+    initials: 'AB',
   },
   {
-    name: "Rachid A.",
-    city: "Tanger",
-    product: "Glycimax + Appeto+",
-    text: "J'ai pris le pack Glycimax + Appeto+. Je ressens un regain d'énergie en fin de journée et mon transit est plus régulier. La livraison sur Tanger a pris 48 heures.",
+    name: 'Rachid A.',
+    city: 'Tanger',
+    product: 'Glycimax + Appeto+',
+    problemBefore: 'Fatigue en fin de journée et manque d\'appétit depuis un moment.',
+    advisorExperience: 'La conseillère m\'a suggéré les deux produits ensemble. Elle m\'a bien expliqué les bienfaits de chacun et les a adaptés à ma situation.',
+    deliveryExperience: 'Livraison sur Tanger en 48h. Paiement à la réception, sans problème.',
     rating: 5,
-    avatar: "RA",
-    color: "bg-brand-green text-brand-gold"
+    initials: 'RA',
   },
   {
-    name: "Fatima-Zahra K.",
-    city: "Fès",
-    product: "Glycimax Magnésium",
-    text: "Excellent produit et emballage soigné. Très efficace pour réduire mes crampes nocturnes et la fatigue du matin.",
+    name: 'Fatima-Zahra K.',
+    city: 'Fès',
+    product: 'Glycimax Magnésium',
+    problemBefore: 'Crampes nocturnes et fatigue matinale constante.',
+    advisorExperience: 'Très bonne conseillère. Elle répond vite et donne des informations claires. Pas de pression pour acheter.',
+    deliveryExperience: 'Reçu en 48h. J\'ai payé au livreur, parfait.',
     rating: 5,
-    avatar: "FK",
-    color: "bg-brand-green text-brand-gold"
-  }
+    initials: 'FK',
+  },
 ];
 
-export default function Testimonials() {
+export default function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Swipe support state
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  const minSwipeDistance = 50;
+  const handleNext = () => setCurrentIndex((p) => (p + 1) % reviews.length);
+  const handlePrev = () => setCurrentIndex((p) => (p - 1 + reviews.length) % reviews.length);
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % reviews.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
-  };
-
-  // Touch handlers for mobile swipe
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
+  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
-    if (isLeftSwipe) {
-      handleNext();
-    } else if (isRightSwipe) {
-      handlePrev();
-    }
+    if (distance > 50) handleNext();
+    else if (distance < -50) handlePrev();
   };
 
-  // Keyboard controls
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft') {
-      handlePrev();
-    } else if (e.key === 'ArrowRight') {
-      handleNext();
-    }
-  };
+  const review = reviews[currentIndex];
 
   return (
-    <section id="temoignages" className="py-24 bg-brand-beige overflow-hidden" aria-label="Témoignages clients">
+    <section
+      id="temoignages"
+      className="py-12 sm:py-16 lg:py-24 bg-brand-beige border-b border-brand-border/30 relative z-20"
+      aria-label="Témoignages clients"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header using SectionHeader primitive */}
-        <SectionHeader
-          tagline="Témoignages"
-          title="Ce que disent nos clients"
-          description="Rejoignez des milliers de Marocains qui ont transformé leur bien-être avec nos compléments alimentaires."
-          className="mb-16"
-        />
 
-        {/* Carousel Slider with touch swipe controls */}
-        <div 
-          className="relative max-w-3xl mx-auto mb-16 px-4 select-none"
+        {/* Header */}
+        <div className="text-center mb-14">
+          <span className="inline-block text-xs font-black uppercase tracking-widest text-brand-gold bg-brand-gold/10 border border-brand-gold/20 px-4 py-1.5 rounded-full mb-4">
+            Témoignages
+          </span>
+          <h2 className="font-serif font-black text-brand-dark text-3xl sm:text-4xl lg:text-5xl leading-tight mb-4">
+            Ce que disent nos clients
+          </h2>
+          <p className="text-brand-muted text-sm sm:text-base max-w-xl mx-auto leading-relaxed font-light">
+            Des histoires vraies : le problème d'avant, l'expérience avec la conseillère, et la commande.
+          </p>
+        </div>
+
+        {/* Carousel */}
+        <div
+          className="max-w-3xl mx-auto mb-14"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          
-          <div className="relative min-h-[300px] md:min-h-[260px] flex items-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.3 }}
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
-                className="w-full bg-white text-brand-dark p-8 md:p-10 rounded-3xl shadow-md border border-brand-border/60 relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-2"
-                aria-label={`Témoignage de ${reviews[currentIndex].name} de ${reviews[currentIndex].city}. Produit : ${reviews[currentIndex].product}. Utilisez les touches fléchées gauche et droite pour naviguer.`}
-              >
-                {/* Visual quote mark decoration */}
-                <div className="absolute -top-10 -right-4 font-serif text-[180px] font-black text-brand-green/5 leading-none pointer-events-none select-none" aria-hidden="true">
-                  “
-                </div>
+          <div
+            key={currentIndex}
+            className="bg-white rounded-3xl border border-brand-border/40 shadow-xl overflow-hidden animate-fadeIn"
+          >
+            {/* Product tag */}
+            <div className="bg-brand-green px-6 py-3 flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-brand-gold">
+                {review.product}
+              </span>
+              <div className="flex gap-1 text-brand-gold" aria-label={`${review.rating} étoiles`}>
+                {[...Array(review.rating)].map((_, i) => (
+                  <Star key={i} size={12} fill="currentColor" stroke="none" aria-hidden="true" />
+                ))}
+              </div>
+            </div>
 
-                {/* Stars and Product Tag */}
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                  <div className="flex gap-1 text-brand-gold" aria-label="Évaluation de 5 étoiles">
-                    {[...Array(reviews[currentIndex].rating)].map((_, i) => (
-                      <Star key={i} size={16} fill="currentColor" stroke="none" aria-hidden="true" />
-                    ))}
-                  </div>
-                  <span className="bg-brand-beige border border-brand-border/60 text-brand-green text-[10px] sm:text-xs uppercase tracking-wider px-3.5 py-1 rounded-full font-bold">
-                    Produit : {reviews[currentIndex].product}
-                  </span>
-                </div>
-
-                {/* Testimonial body */}
-                <p className="text-sm sm:text-base text-brand-dark/90 leading-relaxed font-sans font-light italic mb-6">
-                  "{reviews[currentIndex].text}"
+            <div className="p-7 sm:p-10 space-y-5">
+              {/* Problem before */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-muted mb-1.5">Avant :</p>
+                <p className="text-sm text-brand-dark/80 leading-relaxed font-light italic">
+                  "{review.problemBefore}"
                 </p>
+              </div>
 
-                {/* Reviewer Details */}
-                <div className="flex items-center gap-3.5 border-t border-brand-border/40 pt-5">
-                  <div className={`w-11 h-11 rounded-xl ${reviews[currentIndex].color} flex items-center justify-center font-bold text-sm shadow-sm`} aria-hidden="true">
-                    {reviews[currentIndex].avatar}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm sm:text-base text-brand-dark flex flex-wrap items-center gap-2">
-                      {reviews[currentIndex].name}
-                      <span className="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] font-bold text-brand-green bg-[#DCF8C6]/30 px-2 py-0.5 rounded-full border border-brand-green/20">
-                        <Check size={10} className="stroke-[2.5]" aria-hidden="true" /> Achat Vérifié
-                      </span>
-                    </h4>
-                    <p className="text-[10px] sm:text-[11px] text-brand-muted font-semibold tracking-wider uppercase mt-0.5">
-                      {reviews[currentIndex].city}, Maroc
-                    </p>
-                  </div>
+              {/* Advisor experience */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-green mb-1.5">Expérience avec la conseillère :</p>
+                <p className="text-sm text-brand-dark/85 leading-relaxed font-medium">
+                  "{review.advisorExperience}"
+                </p>
+              </div>
+
+              {/* Delivery/payment */}
+              <div className="flex items-start gap-2 bg-brand-beige rounded-xl p-3 border border-brand-border/30">
+                <span className="text-sm" aria-hidden="true">🚚</span>
+                <p className="text-xs text-brand-dark/70 leading-relaxed font-medium italic">
+                  {review.deliveryExperience}
+                </p>
+              </div>
+
+              {/* Reviewer */}
+              <div className="flex items-center gap-3.5 border-t border-brand-border/30 pt-5">
+                <div className="w-11 h-11 rounded-xl bg-brand-green text-brand-gold flex items-center justify-center font-black text-sm shadow-sm" aria-hidden="true">
+                  {review.initials}
                 </div>
-              </motion.div>
-            </AnimatePresence>
+                <div>
+                  <h4 className="font-bold text-sm text-brand-dark flex items-center gap-2">
+                    {review.name}
+                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full border border-brand-green/20">
+                      <Check size={9} className="stroke-[2.5]" aria-hidden="true" /> Achat Vérifié
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-brand-muted font-semibold tracking-wider uppercase">
+                    {review.city}, Maroc 🇲🇦
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-center gap-5 mt-8">
-            <button 
+          {/* Navigation */}
+          <div className="flex items-center justify-center gap-5 mt-7">
+            <button
               onClick={handlePrev}
               aria-label="Témoignage précédent"
-              className="w-11 h-11 rounded-full border border-brand-border/60 bg-white text-brand-dark flex items-center justify-center shadow-xs hover:bg-brand-beige hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
+              className="w-11 h-11 rounded-full border border-brand-border/60 bg-white text-brand-dark flex items-center justify-center shadow-sm hover:bg-brand-beige hover:scale-105 active:scale-95 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
             >
               <ChevronLeft size={20} aria-hidden="true" />
             </button>
-            
+
             <div className="flex items-center gap-2" role="tablist" aria-label="Sélecteur de témoignage">
               {reviews.map((_, i) => (
                 <button
                   key={i}
                   role="tab"
                   aria-selected={currentIndex === i}
-                  aria-label={`Voir le témoignage numéro ${i + 1}`}
+                  aria-label={`Voir le témoignage ${i + 1}`}
                   onClick={() => setCurrentIndex(i)}
-                  className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none ${
-                    currentIndex === i ? 'bg-brand-green w-6' : 'bg-brand-muted/40 hover:bg-brand-muted/70 w-2.5'
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none ${
+                    currentIndex === i ? 'bg-brand-green w-6' : 'bg-brand-muted/30 hover:bg-brand-muted/60 w-2'
                   }`}
                 />
               ))}
             </div>
 
-            <button 
+            <button
               onClick={handleNext}
               aria-label="Témoignage suivant"
-              className="w-11 h-11 rounded-full border border-brand-border/60 bg-white text-brand-dark flex items-center justify-center shadow-xs hover:bg-brand-beige hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
+              className="w-11 h-11 rounded-full border border-brand-border/60 bg-white text-brand-dark flex items-center justify-center shadow-sm hover:bg-brand-beige hover:scale-105 active:scale-95 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
             >
               <ChevronRight size={20} aria-hidden="true" />
             </button>
           </div>
-
         </div>
 
-        {/* Action Banner */}
-        <div className="max-w-4xl mx-auto bg-white rounded-3xl p-8 md:p-12 border border-brand-border/40 shadow-xl shadow-brand-dark/5 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-brand-gold/5 rounded-full blur-2xl pointer-events-none"></div>
+        {/* Action banner */}
+        <div className="max-w-4xl mx-auto bg-white rounded-3xl p-8 sm:p-10 border border-brand-border/40 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-7 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-brand-gold/5 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
           <div>
-            <span className="text-[10px] uppercase tracking-widest text-brand-green font-bold block mb-1">
-              Garantie de Confiance
-            </span>
-            <h3 className="text-xl md:text-2xl font-serif font-black text-brand-dark mb-2">
-              Prêt à booster votre bien-être ?
+            <span className="text-[10px] uppercase tracking-widest text-brand-green font-black block mb-1">Rejoignez nos clients</span>
+            <h3 className="font-serif font-black text-brand-dark text-xl sm:text-2xl mb-1">
+              Prêt à commencer votre bien-être ?
             </h3>
-            <p className="text-sm text-brand-muted font-sans font-light">
-              Des milliers de commandes livrées avec soin partout au Maroc. Plus de 98% de satisfaction client.
+            <p className="text-sm text-brand-muted font-light">
+              Parlez avec notre conseillère avant de commander — aucun engagement.
             </p>
           </div>
-          
-          <PrimaryCTA
-            onClick={() => openWhatsApp("Bonjour, je souhaite commander après avoir vu les avis clients !")}
-            theme="whatsapp"
-            icon={<MessageCircle size={22} aria-hidden="true" />}
-            className="w-full md:w-auto px-8 py-4 shrink-0 text-base"
-            ariaLabel="Discuter avec un conseiller sur WhatsApp"
+          <button
+            id="testimonials-whatsapp-cta"
+            onClick={() => openWhatsApp('Bonjour, j\'ai vu les témoignages et je voudrais commander. Pouvez-vous me conseiller ?')}
+            className="inline-flex items-center gap-2.5 bg-whatsapp-green hover:bg-whatsapp-hover text-white font-black text-sm px-7 py-4 rounded-xl transition-all shadow-md shadow-whatsapp-green/20 shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-whatsapp-green outline-none min-h-[52px]"
+            aria-label="Discuter avec un conseiller sur WhatsApp"
           >
+            <MessageCircle size={18} aria-hidden="true" />
             Discuter sur WhatsApp
-          </PrimaryCTA>
+          </button>
         </div>
 
       </div>

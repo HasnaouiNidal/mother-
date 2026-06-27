@@ -1,293 +1,282 @@
 import { useState } from 'react';
-import { HelpCircle, ChevronRight, RotateCcw, ShieldAlert, Check, Brain, Flame, Sparkles, User, Baby, Moon, Activity, ShoppingBag } from 'lucide-react';
+import { ChevronRight, RotateCcw, CheckCircle2, MessageCircle } from 'lucide-react';
 import { openWhatsApp } from '../lib/utils';
-import PrimaryCTA from './ui/PrimaryCTA';
-import SecondaryCTA from './ui/SecondaryCTA';
 
-interface QuizQuestion {
-  id: number;
-  question: string;
-  options: {
-    text: string;
-    icon: React.ComponentType<any>;
-    points: Record<string, number>;
-  }[];
+interface QuizProps {
+  onRecommend: (productId: string, qty: number) => void;
 }
 
-export default function QuizSection({ onRecommend }: { onRecommend: (productId: string, packQty: number) => void }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [scores, setScores] = useState<Record<string, number>>({
-    glycimax: 0,
-    appeto: 0,
-    pack: 0
-  });
-  const [quizFinished, setQuizFinished] = useState(false);
-  const [recommendation, setRecommendation] = useState<{ id: string; name: string; qty: number; desc: string; price: number } | null>(null);
+type Answer = string;
 
-  // Maximum of 3 steps simple quiz
-  const questions: QuizQuestion[] = [
-    {
-      id: 1,
-      question: "Quel est votre objectif de santé principal ?",
-      options: [
-        { text: "Retrouver de l'énergie, calmer le stress & mieux dormir", icon: Brain, points: { glycimax: 3, appeto: 0, pack: 1 } },
-        { text: "Stimuler mon appétit et fortifier mon organisme", icon: Flame, points: { glycimax: 0, appeto: 3, pack: 1 } },
-        { text: "Les deux (Fatigue accumulée + manque d'appétit)", icon: Sparkles, points: { glycimax: 1, appeto: 1, pack: 4 } }
-      ]
-    },
-    {
-      id: 2,
-      question: "Pour qui est destiné ce complément alimentaire ?",
-      options: [
-        { text: "Un adulte ou adolescent (+12 ans)", icon: User, points: { glycimax: 2, appeto: 1, pack: 2 } },
-        { text: "Un enfant de moins de 12 ans", icon: Baby, points: { glycimax: 0, appeto: 3, pack: 0 } }
-      ]
-    },
-    {
-      id: 3,
-      question: "Ressentez-vous d'autres inconforts au quotidien ?",
-      options: [
-        { text: "Oui (Anxiété, crampes musculaires, sommeil agité)", icon: Moon, points: { glycimax: 3, appeto: 0, pack: 1 } },
-        { text: "Oui (Digestion difficile, fatigue après repas)", icon: Activity, points: { glycimax: 0, appeto: 3, pack: 1 } },
-        { text: "Non, aucun de ces symptômes en particulier", icon: Check, points: { glycimax: 1, appeto: 1, pack: 0 } }
-      ]
+const questions = [
+  {
+    id: 1,
+    question: 'Quel est votre objectif principal ?',
+    options: [
+      { text: 'Mieux dormir / réduire le stress', product: 'glycimax', emoji: '😴' },
+      { text: 'Retrouver de l\'énergie', product: 'glycimax', emoji: '⚡' },
+      { text: 'Stimuler l\'appétit', product: 'appeto', emoji: '🍽️' },
+      { text: 'Je ne sais pas, je veux un conseil', product: 'conseil', emoji: '💬' },
+    ],
+  },
+  {
+    id: 2,
+    question: 'Depuis combien de temps ressentez-vous ce besoin ?',
+    options: [
+      { text: 'Quelques jours', product: null, emoji: '📅' },
+      { text: 'Quelques semaines', product: null, emoji: '🗓️' },
+      { text: 'Plus d\'un mois', product: null, emoji: '⏳' },
+    ],
+  },
+  {
+    id: 3,
+    question: 'Vous préférez quoi ?',
+    options: [
+      { text: 'Commander directement', product: null, emoji: '🛍️' },
+      { text: 'Parler avec la conseillère', product: null, emoji: '💬' },
+      { text: 'Recevoir une recommandation', product: null, emoji: '✅' },
+    ],
+  },
+];
+
+const products: Record<string, { id: string; name: string; desc: string; price: string; image: string }> = {
+  glycimax: {
+    id: 'glycimax',
+    name: 'Glycimax Magnésium',
+    desc: 'Magnésium bisglycinate + Vitamine B6 pour soutenir le sommeil, réduire la fatigue et contribuer au bon fonctionnement du système nerveux.',
+    price: '349',
+    image: '/glycimax-premium.png',
+  },
+  appeto: {
+    id: 'appeto',
+    name: 'Appeto+ Sirop',
+    desc: 'Sirop fortifiant naturel aux extraits de plantes pour aider à stimuler l\'appétit et soutenir la vitalité au quotidien.',
+    price: '259',
+    image: '/appeto.png',
+  },
+  conseil: {
+    id: 'glycimax',
+    name: 'Conseil personnalisé',
+    desc: 'Parfait ! Notre conseillère vous guidera directement sur WhatsApp pour vous orienter vers le produit le plus adapté à votre situation.',
+    price: '',
+    image: '/glycimax-premium.png',
+  },
+};
+
+export default function QuizSection({ onRecommend }: QuizProps) {
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [recommendedProduct, setRecommendedProduct] = useState<string | null>(null);
+  const [finished, setFinished] = useState(false);
+
+  const handleAnswer = (option: { text: string; product: string | null }) => {
+    const newAnswers = [...answers, option.text];
+    setAnswers(newAnswers);
+
+    if (step === 0 && option.product) {
+      setRecommendedProduct(option.product);
     }
-  ];
 
-  const handleAnswer = (points: Record<string, number>) => {
-    // Accumulate points instantly
-    setScores(prev => {
-      const nextScores = { ...prev };
-      Object.keys(points).forEach(key => {
-        nextScores[key] = (nextScores[key] || 0) + points[key];
-      });
-      return nextScores;
-    });
-
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(prev => prev + 1);
+    if (step < questions.length - 1) {
+      setStep(step + 1);
     } else {
-      calculateResult();
+      // Show result
+      const finalProduct = recommendedProduct ?? 'glycimax';
+      if (finalProduct !== 'conseil') {
+        onRecommend(finalProduct, 2);
+      }
+      setFinished(true);
     }
   };
 
-  const calculateResult = () => {
-    let winner = 'glycimax';
-    let maxScore = -1;
-
-    const finalScores = { ...scores };
-    Object.keys(finalScores).forEach(key => {
-      if (finalScores[key] > maxScore) {
-        maxScore = finalScores[key];
-        winner = key;
-      }
-    });
-
-    // Build recommendations
-    let recProduct = {
-      id: "glycimax",
-      name: "Glycimax Magnésium",
-      qty: 2,
-      desc: "Notre formule haut de gamme au Bisglycinate de Magnésium et Vitamine B6. Parfait pour calmer votre système nerveux, relaxer vos muscles et restaurer des nuits profondes.",
-      price: 349
-    };
-
-    if (winner === 'appeto') {
-      recProduct = {
-        id: "appeto",
-        name: "Appeto+ Sirop",
-        qty: 2,
-        desc: "Notre sirop fortifiant 100% naturel aux extraits de plantes. Idéal pour stimuler l'appétit de façon saine, faciliter la digestion et recharger votre tonus physique.",
-        price: 259
-      };
-    } else if (winner === 'pack') {
-      recProduct = {
-        id: "glycimax-appeto",
-        name: "Pack Vitalité Duo (Glycimax + Appeto+)",
-        qty: 3,
-        desc: "La synergie complète pour éliminer la fatigue, détendre l'organisme, retrouver l'appétit et fortifier le métabolisme en profondeur.",
-        price: 329
-      };
-    }
-
-    setRecommendation(recProduct);
-    setQuizFinished(true);
+  const reset = () => {
+    setStep(0);
+    setAnswers([]);
+    setRecommendedProduct(null);
+    setFinished(false);
   };
 
-  const resetQuiz = () => {
-    setCurrentStep(0);
-    setScores({ glycimax: 0, appeto: 0, pack: 0 });
-    setQuizFinished(false);
-    setRecommendation(null);
+  const sendToWhatsApp = () => {
+    const prod = products[recommendedProduct ?? 'glycimax'];
+    const mainNeed = answers[0] ?? 'non précisé';
+    const duration = answers[1] ?? 'non précisé';
+    const preference = answers[2] ?? 'non précisé';
+    const message =
+      `Bonjour Health Power Maroc, j'ai fait le quiz sur votre site.\n\n` +
+      `Mon besoin principal est : ${mainNeed}\n` +
+      `Depuis : ${duration}\n` +
+      `Je préfère : ${preference}\n\n` +
+      `Produit recommandé : ${prod.name}\n\n` +
+      `Pouvez-vous me conseiller le produit adapté ? Merci !`;
+    openWhatsApp(message);
   };
 
-  const selectRecommendation = () => {
-    if (recommendation) {
-      let targetId = "produits";
-      if (recommendation.id === "glycimax") {
-        targetId = "product-glycimax";
-      } else if (recommendation.id === "appeto") {
-        targetId = "product-appeto";
-      }
-
-      // Sync choice to parent state if needed, so it pre-selects in the checkout form
-      if (recommendation.id === "glycimax-appeto") {
-        onRecommend("glycimax", 3);
-      } else {
-        onRecommend(recommendation.id, recommendation.qty);
-      }
-
-      const element = document.getElementById(targetId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
+  const scrollToProduct = () => {
+    const finalProduct = recommendedProduct ?? 'glycimax';
+    const anchor = finalProduct === 'appeto' ? 'product-appeto' : 'product-glycimax';
+    document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  const handleWhatsAppOrder = () => {
-    if (recommendation) {
-      const message = `Bonjour Health Power ! Suite au test du Conseiller Recommendeur, je souhaite commander la solution recommandée : "${recommendation.name}" au tarif spécial de ${recommendation.price} DHS. Pouvez-vous confirmer ma livraison ?`;
-      openWhatsApp(message);
-    }
-  };
+  const rec = products[recommendedProduct ?? 'glycimax'];
+  const progress = ((step + 1) / questions.length) * 100;
 
   return (
-    <section className="py-20 bg-brand-beige border-b border-brand-border/30 relative z-20" aria-label="Recommendeur de compléments intelligent">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Card Frame */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-12 border border-brand-border/40 shadow-xl shadow-brand-dark/5 relative overflow-hidden">
-          
-          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 rounded-full blur-xl pointer-events-none" aria-hidden="true"></div>
+    <section
+      id="quiz"
+      className="py-12 sm:py-16 lg:py-24 bg-white border-b border-brand-border/30 relative z-20"
+      aria-label="Quiz de recommandation produit"
+    >
+      <div className="max-w-2xl mx-auto px-4 sm:px-6">
 
-          {!quizFinished ? (
-            <div className="space-y-6 sm:space-y-8">
-              
-              {/* Progress & Steps indicators (Ensures no text below 14px) */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-brand-green">
-                  <HelpCircle size={18} aria-hidden="true" />
-                  <span className="font-sans font-bold text-sm uppercase tracking-wider">Conseiller Intelligent</span>
-                </div>
-                <span className="text-sm text-brand-muted font-bold font-sans">
-                  Question {currentStep + 1} sur {questions.length}
-                </span>
-              </div>
+        {/* Header */}
+        <div className="text-center mb-10">
+          <span className="inline-block text-xs font-black uppercase tracking-widest text-brand-green bg-brand-green/5 border border-brand-green/15 px-4 py-1.5 rounded-full mb-4">
+            Quiz rapide
+          </span>
+          <h2 className="font-serif font-black text-brand-dark text-3xl sm:text-4xl leading-tight mb-3">
+            Répondez à 3 questions et trouvez le produit adapté
+          </h2>
+          <p className="text-brand-muted text-sm font-light">
+            Moins de 30 secondes. Résultat envoyé sur WhatsApp.
+          </p>
+        </div>
 
-              {/* Progress bar line wrapper */}
-              <div className="w-full h-1.5 bg-brand-beige rounded-full overflow-hidden" aria-hidden="true">
-                <div 
-                  className="h-full bg-brand-green rounded-full transition-all duration-150"
-                  style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
+        {/* Card */}
+        <div className="bg-white border border-brand-border/40 rounded-3xl shadow-xl overflow-hidden">
+
+          {!finished ? (
+            <div>
+              {/* Progress bar */}
+              <div className="h-1.5 bg-brand-beige" aria-hidden="true">
+                <div
+                  className="h-full bg-brand-green rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }}
                 />
               </div>
 
-              {/* Question title */}
-              <h3 className="text-xl sm:text-2xl font-serif font-black text-brand-dark leading-tight">
-                {questions[currentStep].question}
-              </h3>
+              <div className="p-7 sm:p-10">
+                {/* Step indicator */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-xs font-black uppercase tracking-widest text-brand-green">
+                    Question {step + 1} sur {questions.length}
+                  </span>
+                  <div className="flex gap-1.5">
+                    {questions.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`w-2 h-2 rounded-full transition-all ${i <= step ? 'bg-brand-green' : 'bg-brand-border'}`}
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
+                </div>
 
-              {/* Options List: large tappable cards with icons & arrows */}
-              <div className="space-y-3.5 sm:space-y-4" role="group" aria-label={`Options pour la question ${currentStep + 1}`}>
-                {questions[currentStep].options.map((option, idx) => {
-                  const Icon = option.icon;
-                  return (
+                {/* Question */}
+                <h3 className="font-serif font-black text-brand-dark text-xl sm:text-2xl mb-7 leading-snug">
+                  {questions[step].question}
+                </h3>
+
+                {/* Options */}
+                <div className="space-y-3" role="group" aria-label={`Options pour la question ${step + 1}`}>
+                  {questions[step].options.map((option) => (
                     <button
-                      key={idx}
+                      key={option.text}
                       type="button"
-                      onClick={() => handleAnswer(option.points)}
-                      className="w-full p-4 sm:p-5 text-left border border-brand-border/50 hover:border-brand-green hover:bg-brand-green/5 bg-white rounded-2xl transition-all duration-75 flex items-center justify-between group cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-1 outline-none min-h-[48px]"
+                      onClick={() => handleAnswer(option)}
+                      className="w-full flex items-center gap-4 p-4 rounded-2xl border border-brand-border/50 bg-brand-beige/30 hover:border-brand-green hover:bg-brand-green/5 text-left transition-all duration-150 group cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none min-h-[56px]"
                     >
-                      <div className="flex items-center">
-                        <div className="w-11 h-11 rounded-full bg-brand-green/5 text-brand-green border border-brand-green/10 flex items-center justify-center shrink-0" aria-hidden="true">
-                          <Icon size={20} className="stroke-[2]" />
-                        </div>
-                        <span className="text-sm sm:text-base font-bold text-brand-dark ml-4 leading-snug">
-                          {option.text}
-                        </span>
-                      </div>
-                      <ChevronRight size={16} className="text-brand-muted/40 group-hover:text-brand-green group-hover:translate-x-0.5 transition-all shrink-0 ml-2" aria-hidden="true" />
+                      <span className="text-2xl shrink-0 select-none" aria-hidden="true">{option.emoji}</span>
+                      <span className="text-sm sm:text-base font-bold text-brand-dark flex-grow leading-snug">
+                        {option.text}
+                      </span>
+                      <ChevronRight
+                        size={16}
+                        className="text-brand-muted/40 group-hover:text-brand-green group-hover:translate-x-0.5 transition-all shrink-0"
+                        aria-hidden="true"
+                      />
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
           ) : (
-            <div className="text-center space-y-6 sm:space-y-8">
-              
-              {/* Recommendation icon stamp */}
-              <div className="w-16 h-16 bg-brand-green/10 text-brand-green rounded-full flex items-center justify-center mx-auto" aria-hidden="true">
-                <Check size={30} className="stroke-[2.5]" />
-              </div>
+            <div className="p-7 sm:p-10">
+              {/* Result */}
+              <div className="text-center">
+                <div className="w-16 h-16 bg-brand-green/10 text-brand-green rounded-2xl flex items-center justify-center mx-auto mb-5">
+                  <CheckCircle2 size={30} aria-hidden="true" />
+                </div>
 
-              <div>
-                <span className="text-sm uppercase tracking-widest text-brand-gold font-bold bg-brand-dark text-brand-beige px-4 py-1.5 rounded-full mb-3 inline-block">
-                  Recommandation Personnalisée
+                <span className="inline-block text-xs font-black uppercase tracking-widest bg-brand-dark text-brand-gold px-5 py-1.5 rounded-full mb-5">
+                  Recommandation personnalisée
                 </span>
-                
-                <h3 className="text-sm font-sans font-bold text-brand-muted uppercase tracking-wider mt-4">
-                  Produit recommandé
-                </h3>
-                
-                <h4 className="text-2xl sm:text-3xl font-serif font-black text-brand-dark mt-1">
-                  {recommendation?.name}
-                </h4>
-              </div>
 
-              <p className="text-sm sm:text-base text-brand-muted max-w-lg mx-auto leading-relaxed font-sans font-light">
-                {recommendation?.desc}
-              </p>
+                {/* Product preview */}
+                <div className="flex items-center justify-center gap-5 mb-5 p-5 bg-brand-beige rounded-2xl border border-brand-border/40">
+                  <img
+                    src={rec.image}
+                    alt={rec.name}
+                    className="w-16 h-16 object-contain"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <div className="text-left">
+                    <p className="text-xs font-black uppercase tracking-wider text-brand-muted mb-1">Produit recommandé</p>
+                    <h4 className="font-serif font-black text-brand-dark text-xl">{rec.name}</h4>
+                    {rec.price && (
+                      <p className="text-brand-green font-bold text-sm mt-0.5">
+                        À partir de <span className="font-black">{rec.price} DHS</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-              {/* Special reassurance strip */}
-              <div className="inline-flex items-center gap-2 p-3 bg-brand-green/5 rounded-2xl border border-brand-green/10 max-w-sm mx-auto">
-                <ShieldAlert size={16} className="text-brand-green flex-shrink-0" aria-hidden="true" />
-                <span className="text-sm text-brand-dark font-sans font-bold text-left">
-                  Livraison Express Gratuite + Paiement à la réception 🚚
-                </span>
-              </div>
+                <p className="text-brand-muted text-sm leading-relaxed mb-7 max-w-md mx-auto font-light">
+                  {rec.desc}
+                </p>
 
-              {/* Pricing section */}
-              <div>
-                <span className="text-sm uppercase tracking-widest text-brand-muted font-bold block mb-1">Tarif Exclusif</span>
-                <span className="text-2xl sm:text-3xl font-serif font-black text-brand-dark">{recommendation?.price} DHS</span>
-              </div>
+                {/* Trust strip */}
+                <div className="flex items-center justify-center gap-2 bg-brand-green/5 border border-brand-green/10 rounded-xl p-3 mb-7 max-w-xs mx-auto">
+                  <span className="text-brand-gold text-sm">🚚</span>
+                  <span className="text-xs font-bold text-brand-dark">Livraison gratuite + paiement à la réception</span>
+                </div>
 
-              {/* Action triggers (Voir le produit & Commander) */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                <SecondaryCTA
-                  onClick={selectRecommendation}
-                  theme="outline"
-                  className="w-full sm:w-auto px-8 py-4 font-bold text-sm min-h-[48px]"
-                  ariaLabel="Voir la fiche détaillée de ce produit recommandé"
-                >
-                  Voir le produit
-                </SecondaryCTA>
-                
-                <PrimaryCTA
-                  onClick={handleWhatsAppOrder}
-                  theme="whatsapp"
-                  className="w-full sm:w-auto px-8 py-4 font-black text-sm"
-                  ariaLabel="Commander ce produit recommandé directement sur WhatsApp"
-                >
-                  Commander via WhatsApp
-                </PrimaryCTA>
-              </div>
+                {/* CTAs */}
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    id="quiz-result-whatsapp-cta"
+                    onClick={sendToWhatsApp}
+                    className="shimmer-btn inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl font-black text-sm text-white shadow-lg min-h-[52px] cursor-pointer focus-visible:ring-2 focus-visible:ring-whatsapp-green outline-none"
+                    aria-label="Envoyer mon résultat sur WhatsApp"
+                  >
+                    <MessageCircle size={18} aria-hidden="true" />
+                    Envoyer mon résultat sur WhatsApp
+                  </button>
 
-              {/* Restart quiz */}
-              <div className="pt-4">
+                  {recommendedProduct !== 'conseil' && (
+                    <button
+                      onClick={scrollToProduct}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 border-brand-border/50 text-brand-dark font-bold text-sm hover:border-brand-green hover:text-brand-green transition-all min-h-[52px] cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-green outline-none"
+                      aria-label="Voir la fiche du produit recommandé"
+                    >
+                      Voir le produit
+                    </button>
+                  )}
+                </div>
+
+                {/* Restart */}
                 <button
-                  type="button"
-                  onClick={resetQuiz}
-                  className="inline-flex items-center gap-2 text-sm text-brand-muted hover:text-brand-dark font-bold py-2 px-4 focus-visible:ring-2 focus-visible:ring-brand-green rounded-lg outline-none"
-                  aria-label="Recommencer le questionnaire de recommandation"
+                  onClick={reset}
+                  className="mt-5 inline-flex items-center gap-2 text-xs text-brand-muted hover:text-brand-dark font-bold py-2 px-4 focus-visible:ring-2 focus-visible:ring-brand-green rounded-lg outline-none cursor-pointer"
+                  aria-label="Recommencer le quiz"
                 >
-                  <RotateCcw size={14} aria-hidden="true" /> Recommencer le test
+                  <RotateCcw size={13} aria-hidden="true" />
+                  Recommencer le quiz
                 </button>
               </div>
             </div>
           )}
-
         </div>
+
       </div>
     </section>
   );

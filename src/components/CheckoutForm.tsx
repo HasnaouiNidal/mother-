@@ -198,7 +198,7 @@ Merci de confirmer ma commande pour livraison ! 🇲🇦`;
   };
 
   return (
-    <section id="form-commande" className="py-24 bg-brand-beige border-y border-brand-border/40 relative z-20">
+    <section id="form-commande" className="py-12 sm:py-16 lg:py-24 bg-brand-beige border-y border-brand-border/40 relative z-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Mobile stacking: order-1 on form, order-2 on support (UX-optimized) */}
